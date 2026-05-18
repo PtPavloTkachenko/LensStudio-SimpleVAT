@@ -38,7 +38,7 @@ Creativity is the limit. A few directions that fit naturally:
 - **Cloth / soft-body playback** — bake a Blender cloth or soft-body simulation once (must cache it in Blender first), replay it deterministically on Spectacles with zero physics cost. Topology has to stay constant across the sim, so **Mantaflow liquid meshes, particles, smoke/fire and cell-fracture rigid bodies won't work** — those change vertex count per frame.
 - **Character cameos** — a small interactive NPC with a handful of looped clips (idle / wave / dance) switched on user gesture via `play("Wave")`.
 - **Procedural object reveals** — bake an unfold / morph / build-up animation in Blender, trigger it on a beat or interaction.
-- **Stylized vertex VFX** — explosions, splashes, magic effects that need precise vertex-level animation on a **single constant-topology mesh**.
+- **Stylized vertex FX on a single mesh** — morphing portals, energy waves, pulsing crystals, twisting vines, hand-animated splash hits modeled as one mesh that deforms. Anything where a single artist-authored mesh swirls / pulses / unfurls on constant topology. Not for particle explosions / liquid splashes / smoke — those change vertex count and need different tech.
 
 Anywhere you'd reach for a bone rig **just to play back a pre-authored loop**, VAT will be cheaper and let you push the count up by an order of magnitude.
 
