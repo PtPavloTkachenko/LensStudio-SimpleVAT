@@ -48,41 +48,11 @@ Anywhere you'd reach for a bone rig **just to play back a pre-authored loop**, V
 
 ## How it works
 
-```mermaid
-flowchart LR
-    subgraph blender ["🟧 Blender Add-on"]
-        direction TB
-        b1["Pick actions
-        (or NLA, sim, shape-keys)"]
-        b2["Bake to PNG +
-        JSON sidecar"]
-        b1 --> b2
-    end
+1. **In Blender** — pick the actions you want (or just use the scene timeline / NLA / simulation / shape keys). One click bakes each animation into a `{base}_{anim}_vat.png` position map plus a small JSON metadata sidecar. A shared `{base}.fbx` is exported with the rest pose.
 
-    subgraph files ["📁 Export folder"]
-        direction TB
-        f1["{base}.fbx
-        (rest mesh)"]
-        f2["{base}_{anim}_vat.png
-        (position map per animation)"]
-        f3["{base}_{anim}.json
-        (metadata sidecar)"]
-    end
+2. **In Lens Studio** — the SimpleVAT panel scans the export folder, lists every animation it finds, lets you tick which ones to import, then creates the material, imports the textures, spawns the mesh, and attaches the runtime controller.
 
-    subgraph ls ["🟦 Lens Studio · SimpleVAT"]
-        direction TB
-        l1["Scan folder"]
-        l2["Tick animations
-        to import"]
-        l3["Spawn mesh + material
-        + VATAnimationController"]
-        l1 --> l2 --> l3
-    end
-
-    blender ==> files ==> ls
-```
-
-At runtime, the bundled `VATAnimationController` script lets any other component switch animations with one call: `controller.play("Run")`. No bones evaluated on device — the whole animation is GPU‑sampled from the position texture.
+3. **At runtime** — the bundled `VATAnimationController` script lets any other component switch animations with one call: `controller.play("Run")`. No bones evaluated on device — the whole animation is GPU-sampled from the position texture, so it costs almost nothing per instance.
 
 ---
 
