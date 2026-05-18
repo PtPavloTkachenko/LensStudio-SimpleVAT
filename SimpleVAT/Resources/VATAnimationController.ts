@@ -26,7 +26,9 @@ const log = {
  *     this.vatController.setTimeOffset(0.25);
  *     const names = this.vatController.getAnimations();
  *
- * Author: Pavlo Tkachenko
+ * Authors:  Pavlo Tkachenko & Stijn Spanhove
+ * Portfolio: https://pavlo-stijn.dev
+ * Repo:      https://github.com/PtPavloTkachenko/LensStudio-SimpleVAT
  */
 @component
 export class VATAnimationController extends BaseScriptComponent {

@@ -3,8 +3,9 @@ bl_info = {
     "version": (2, 0, 0),
     "blender": (4, 2, 0),
     "description": "Export Vertex Animation Textures to Snap Lens Studio",
-    "author": "Based on OpenVAT by Luke Stilson. Reworked by Pavlo Tkachenko",
+    "author": "Pavlo Tkachenko & Stijn Spanhove — https://pavlo-stijn.dev",
     "category": "Export",
+    "doc_url": "https://github.com/PtPavloTkachenko/LensStudio-SimpleVAT",
 }
 
 import bpy

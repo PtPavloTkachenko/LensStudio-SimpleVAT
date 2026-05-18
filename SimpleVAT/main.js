@@ -16,7 +16,9 @@ import * as FileSystem from "LensStudio:FileSystem";
  *   - spawns a SceneObject and attaches a VATAnimationController
  *     script populated with all animation data
  *
- * Author: Pavlo Tkachenko
+ * Authors:  Pavlo Tkachenko & Stijn Spanhove
+ * Portfolio: https://pavlo-stijn.dev
+ * Repo:      https://github.com/PtPavloTkachenko/LensStudio-SimpleVAT
  */
 export class SimpleVATPanel extends PanelPlugin {
     static descriptor() {
@@ -211,7 +213,7 @@ export class SimpleVATPanel extends PanelPlugin {
 
         // Subtle footer credits.
         const credits = new Ui.Label(content);
-        credits.text = "SimpleVAT · by Pavlo Tkachenko";
+        credits.text = "SimpleVAT · by Pavlo & Stijn · pavlo-stijn.dev";
         try { credits.foregroundRole = Ui.ColorRole.PlaceholderContent; } catch (_) {}
         try { credits.fontRole = Ui.FontRole.Small; } catch (_) {}
         credits.setSizePolicy(Ui.SizePolicy.Policy.Expanding, Ui.SizePolicy.Policy.Fixed);

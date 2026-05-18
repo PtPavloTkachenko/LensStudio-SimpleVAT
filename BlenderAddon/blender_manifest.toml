@@ -4,10 +4,10 @@ id = "vat_pipeline"
 version = "2.0.0"
 name = "VAT Pipeline — Lens Studio Exporter"
 tagline = "Export Vertex Animation Textures to Snap Lens Studio"
-maintainer = "Pavlo Tkachenko <pt.pavlo.tkachenko@gmail.com>"
+maintainer = "Pavlo Tkachenko & Stijn Spanhove <pt.pavlo.tkachenko@gmail.com>"
 type = "add-on"
 blender_version_min = "4.2.0"
-website = "https://github.com/luke-stilson/openvat"
+website = "https://pavlo-stijn.dev"
 
 license = [
   "SPDX:GPL-3.0-or-later",

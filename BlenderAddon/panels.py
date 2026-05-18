@@ -93,8 +93,8 @@ class OBJECT_PT_VAT_PIPELINE(bpy.types.Panel):
 
         # Credits
         box = layout.box()
-        box.label(text="Based on OpenVAT by Luke Stilson")
-        box.label(text="Reworked by Pavlo Tkachenko")
+        box.label(text="VAT Pipeline by Pavlo & Stijn")
+        box.label(text="pavlo-stijn.dev")
 
 
 classes = [OBJECT_PT_VAT_PIPELINE]
