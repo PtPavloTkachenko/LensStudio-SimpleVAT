@@ -11,17 +11,43 @@ A two-part open-source pipeline for Snap Spectacles:
 
 ---
 
-## How it looks
+## How it works
 
+```mermaid
+flowchart LR
+    subgraph blender ["🟧 Blender Add-on"]
+        direction TB
+        b1["Pick actions
+        (or NLA, sim, shape-keys)"]
+        b2["Bake to PNG +
+        JSON sidecar"]
+        b1 --> b2
+    end
+
+    subgraph files ["📁 Export folder"]
+        direction TB
+        f1["{base}.fbx
+        (rest mesh)"]
+        f2["{base}_{anim}_vat.png
+        (position map per animation)"]
+        f3["{base}_{anim}.json
+        (metadata sidecar)"]
+    end
+
+    subgraph ls ["🟦 Lens Studio · SimpleVAT"]
+        direction TB
+        l1["Scan folder"]
+        l2["Tick animations
+        to import"]
+        l3["Spawn mesh + material
+        + VATAnimationController"]
+        l1 --> l2 --> l3
+    end
+
+    blender ==> files ==> ls
 ```
-┌──────────────────────┐    folder of files     ┌────────────────────┐
-│  Blender Add-on      │ ────────────────────▶ │  Lens Studio       │
-│  ─────────────       │                        │  Plugin            │
-│  • pick actions      │   {base}.fbx           │  • scan folder     │
-│  • bake → folder     │   {base}_{anim}_vat.png│  • tick animations │
-│                      │   {base}_{anim}.json   │  • import → scene  │
-└──────────────────────┘                        └────────────────────┘
-```
+
+At runtime, the bundled `VATAnimationController` script lets any other component switch animations with one call: `controller.play("Run")`. No bones evaluated on device — the whole animation is GPU‑sampled from the position texture.
 
 ---
 
