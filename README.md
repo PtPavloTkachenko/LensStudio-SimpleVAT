@@ -2,6 +2,10 @@
 
 **Bake vertex-animation textures in Blender, drop them into Lens Studio with one click.**
 
+![SimpleVAT demo — many animated meshes at once](docs/demo.gif)
+
+_Above: dozens of animated meshes running simultaneously on Spectacles — the same scene with a traditional bone rig per character wouldn't hit the perf budget._
+
 A two-part open-source pipeline for Snap Spectacles:
 - A **Blender add-on** that bakes any skeletal / shape-key / simulation animation into a Vertex Animation Texture (VAT) export folder.
 - A **Lens Studio plugin** (`SimpleVAT`) that scans that folder, imports the meshes / textures / shader / runtime controller, and wires everything up in the scene.
@@ -24,6 +28,21 @@ SimpleVAT removes that cost entirely. The animation is **baked into a texture on
 Practical effect: you can render **many more animated meshes simultaneously** than a bone-driven setup would allow on Spectacles hardware.
 
 Trade-off: the animation is **baked and immutable** — you can't blend bones / drive IK / procedurally re-target at runtime. SimpleVAT is for content that can be authored ahead of time. Switching between **multiple baked clips** at runtime is supported via the `VATAnimationController` API (`play("Run")`, etc.).
+
+## What you can build with this
+
+Creativity is the limit. A few directions that fit naturally:
+
+- **Crowds and swarms** — schools of fish, flocks of birds, insects, worms, particles with personality. One mesh, one shader, many copies, each with a `setTimeOffset()` so they don't move in lockstep.
+- **Ambient world life** — flapping flags, swaying plants, idle creatures in the background of an AR scene, breathing volume of a sleeping monster.
+- **Simulation playback** — bake a Blender cloth / soft body / fluid simulation once, replay it deterministically on Spectacles with zero physics cost.
+- **Character cameos** — a small interactive NPC with a handful of looped clips (idle / wave / dance) switched on user gesture via `play("Wave")`.
+- **Procedural object reveals** — bake an unfold / morph / build-up animation in Blender, trigger it on a beat or interaction.
+- **Stylized VFX** — explosions, splashes, magic effects that need precise vertex-level animation but no per-instance variation.
+
+Anywhere you'd reach for a bone rig **just to play back a pre-authored loop**, VAT will be cheaper and let you push the count up by an order of magnitude.
+
+> The 2K texture limits below are deliberately conservative — Spectacles is performance-tight and the current ceilings (≤ 2048 verts and ≤ 2048 frames per clip) fit the vast majority of real use cases. The pipeline can be extended (vertex-row wrapping, multi-texture chains) to lift those limits, but for now the **balance of simplicity vs flexibility is the point**.
 
 ---
 
@@ -130,10 +149,23 @@ The plugin creates `Assets/VAT/{base}/` with:
 - `Materials/Shaders/VAT` (bundled shader graph)
 - `Materials/{base}_VAT_Material`
 - `Script/VATAnimationController`
-- `Textures (Remove Compression)/...` (one PNG per animation — **set compression to None on these**)
+- `Textures (Remove Compression)/...` (one PNG per animation)
 - the imported FBX
 
 And spawns a `{base}_VAT` SceneObject with the material applied and the controller attached.
+
+### ⚠️ Mandatory post-import step — disable texture compression
+
+The textures land in a folder literally named `Textures (Remove Compression)` for a reason. **You MUST disable compression on every VAT texture or the animation will render broken** (banding, jittering verts, scrambled deformation).
+
+For each PNG inside `Textures (Remove Compression)/`:
+
+1. Select the texture in the Asset panel
+2. Open the Inspector
+3. Set **Optimization Type → `None`**
+4. (Recommended) set **Filtering Mode → `Nearest`** and **Mip Maps → `Off`**
+
+This is unavoidable because the VAT format encodes precise per-pixel offset values — any compression / mip filtering averages neighboring pixels and corrupts the encoding.
 
 ---
 
