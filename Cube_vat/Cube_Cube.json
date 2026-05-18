@@ -1,0 +1,10 @@
+{
+    "name": "Cube",
+    "mesh": "Cube.fbx",
+    "position_map": "Cube_Cube_vat.png",
+    "num_frames": 120,
+    "bbox_max": 1.4,
+    "bbox_min": -1.4,
+    "speed": 1.0,
+    "frame_range": "1-120"
+}

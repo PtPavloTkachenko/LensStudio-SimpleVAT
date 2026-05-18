@@ -26,41 +26,47 @@ class OBJECT_PT_VAT_PIPELINE(bpy.types.Panel):
             layout.label(text="Select a mesh object", icon='ERROR')
             return
 
-        # Action list
+        # Detect whether the active mesh has an armature — gates the action list.
+        has_armature = any(m.type == 'ARMATURE' and m.object for m in obj.modifiers)
+        action_list = scene.vat_action_list
+        effective_enabled = sum(1 for item in action_list if item.enabled) if has_armature else 0
+
+        # Action list (only meaningful for armature-driven meshes).
         box = layout.box()
         row = box.row(align=True)
         row.label(text="Actions to Bake", icon='ACTION')
         row.operator("vat.refresh_actions", text="", icon='FILE_REFRESH')
 
-        action_list = scene.vat_action_list
-        if len(action_list) == 0:
-            box.label(text="No actions — Refresh or use Timeline", icon='INFO')
+        if not has_armature:
+            box.label(text="No armature on this mesh — Timeline mode", icon='INFO')
+            box.label(text="(cloth / soft body / shape keys / NLA / sim)")
         else:
-            for item in action_list:
-                row = box.row(align=True)
-                row.prop(item, "enabled", text="")
-                # Action name takes flexible width on the left.
-                row.label(text=item.name)
-                # Slot dropdown — visible only if the action has slots.
-                if item.action and getattr(item.action, "slots", None):
-                    row.prop(item, "slot_enum", text="")
-                # Frame range on the right.
-                if item.action:
-                    fr = item.action.frame_range
-                    row.label(text=f"{int(fr[0])}-{int(fr[1])}")
+            if len(action_list) == 0:
+                box.label(text="No actions — Refresh or use Timeline", icon='INFO')
+            else:
+                for item in action_list:
+                    row = box.row(align=True)
+                    row.prop(item, "enabled", text="")
+                    # Action name takes flexible width on the left.
+                    row.label(text=item.name)
+                    # Slot dropdown — visible only if the action has slots.
+                    if item.action and getattr(item.action, "slots", None):
+                        row.prop(item, "slot_enum", text="")
+                    # Frame range on the right.
+                    if item.action:
+                        fr = item.action.frame_range
+                        row.label(text=f"{int(fr[0])}-{int(fr[1])}")
 
-        # Bake button
-        enabled_count = sum(1 for item in action_list if item.enabled)
+        # Bake button — label adapts to the mode the operator will actually run.
         timeline_frames = scene.frame_end - scene.frame_start + 1
-
         row = layout.row()
         row.scale_y = 1.6
         if not os.path.isdir(abs_path):
             row.enabled = False
             row.label(text="Set output directory", icon='WARNING_LARGE')
         else:
-            if enabled_count > 0:
-                label = f"Bake {enabled_count} Action(s)"
+            if effective_enabled > 0:
+                label = f"Bake {effective_enabled} Action(s)"
             else:
                 label = f"Bake Timeline ({timeline_frames} frames)"
             row.operator("vat.bake", text=label, icon='EXPORT')

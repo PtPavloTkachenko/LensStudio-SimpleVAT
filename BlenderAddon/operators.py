@@ -395,18 +395,27 @@ class OBJECT_OT_VATBake(bpy.types.Operator):
         scene = context.scene
         base = obj.name
 
-        # Each enabled row is an (action, slot_identifier, export_name) tuple.
-        # slot_enum may be "LEGACY"/"EMPTY"/"NONE" — those map to "no explicit slot"
-        # and the bake will auto-detect.
+        # If the active object has no armature, force timeline mode regardless
+        # of action-list ticks. This is the path that handles cloth / soft body /
+        # shape-key / NLA / sim bakes — there are no bones to drive, so the
+        # animation comes from the scene's evaluated state per frame.
+        active_has_armature = _find_armature(obj) is not None
+
         def _row_to_entry(item):
             sid = item.slot_enum or ""
             if sid in ("LEGACY", "EMPTY", "NONE"):
                 sid = ""
             return (item.action, sid, item.action.name)
-        bake_entries = [_row_to_entry(item)
-                        for item in scene.vat_action_list
-                        if item.enabled and item.action]
+        bake_entries = (
+            [_row_to_entry(item)
+             for item in scene.vat_action_list
+             if item.enabled and item.action]
+            if active_has_armature else []
+        )
         timeline_mode = len(bake_entries) == 0
+
+        if not active_has_armature and any(item.enabled for item in scene.vat_action_list):
+            print(f"{TAG} Active object has no armature — ignoring ticked actions, using timeline mode.")
 
         print(f"\n{TAG} Bake start — base='{base}', mode={'timeline' if timeline_mode else f'actions ({len(bake_entries)})'}")
 
