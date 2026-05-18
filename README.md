@@ -4,7 +4,7 @@
 
 ![SimpleVAT demo — many animated meshes at once](docs/demo.gif)
 
-_Above: dozens of animated meshes running simultaneously on Spectacles — the same scene with a traditional bone rig per character wouldn't hit the perf budget._
+_From [**Fruit Defence**](https://www.linkedin.com/posts/stijn-spanhove_this-is-our-submission-for-the-spectacles-activity-7401212775974465536-FYWD) — dozens of animated meshes running simultaneously on Spectacles. The same scene with a traditional bone rig per character wouldn't fit the perf budget._
 
 A two-part open-source pipeline for Snap Spectacles:
 - A **Blender add-on** that bakes any skeletal / shape-key / simulation animation into a Vertex Animation Texture (VAT) export folder.
@@ -239,6 +239,8 @@ PRs welcome. The codebase is intentionally small (a few hundred lines per side) 
 
 [MIT](LICENSE) — do what you want, attribution appreciated.
 
-## Author
+## Authors
 
-**Pavlo Tkachenko** · 2026
+**Pavlo Tkachenko & Stijn Spanhove** — Spectacles developers.
+
+Portfolio: [pavlo-stijn.dev](https://pavlo-stijn.dev) · 2026
