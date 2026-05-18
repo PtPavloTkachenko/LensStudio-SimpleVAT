@@ -4,55 +4,45 @@
 
 ![SimpleVAT demo — many animated meshes at once](docs/demo.gif)
 
-_From [**Fruit Defence**](https://www.linkedin.com/posts/stijn-spanhove_this-is-our-submission-for-the-spectacles-activity-7401212775974465536-FYWD) — dozens of animated meshes running simultaneously on Spectacles. The same scene with a traditional bone rig per character wouldn't fit the perf budget._
+_From [**Fruit Defence**](https://www.linkedin.com/posts/stijn-spanhove_this-is-our-submission-for-the-spectacles-activity-7401212775974465536-FYWD). Dozens of animated meshes at once — a bone rig per character wouldn't fit the perf budget._
 
-A two-part open-source pipeline for Snap Spectacles:
-- A **Blender add-on** that bakes any skeletal / shape-key / simulation animation into a Vertex Animation Texture (VAT) export folder.
-- A **Lens Studio plugin** (`SimpleVAT`) that scans that folder, imports the meshes / textures / shader / runtime controller, and wires everything up in the scene.
+Two-part open-source pipeline for Snap Spectacles:
+- **Blender add-on** that bakes skeletal / shape-key / cloth / soft-body animation into a VAT export folder.
+- **Lens Studio plugin** (`SimpleVAT`) that imports that folder and wires up mesh, material, controller in the scene.
 
-> _If you only need the LS plugin — install just `SimpleVAT/` and feed it a VAT folder you exported elsewhere._
-> _If you want the full pipeline — install the Blender add-on too._
+> Install just `SimpleVAT/` if you only need the LS side and the VAT folder comes from somewhere else.
 
 ---
 
-## Why this exists
+## Why
 
-Spectacles is performance-tight. A scene with **dozens of animated characters**, each carrying an armature with full bone evaluation, hits the draw-call / CPU budget fast — runtime bone transforms are expensive, every skinned mesh adds work, and the scene graph balloons.
+A scene with many animated characters and full bone rigs hits the Spectacles perf budget fast. SimpleVAT bakes the animation into a texture; at runtime the GPU samples it per vertex.
 
-SimpleVAT removes that cost entirely. The animation is **baked into a texture once**; at runtime the GPU samples that texture per vertex. Result:
-- **No bones in the scene** — just one mesh + one shader + one tiny controller component.
-- **No CPU-side animation eval** — pure vertex shader.
-- **Cheap instancing** — many copies of the same mesh share the same texture; one extra material per visual variant.
-- **One draw call per visible group** instead of one per skinned hierarchy.
+- **No bones** in the scene — one mesh + one shader + one tiny controller.
+- **No CPU anim eval** — pure vertex shader.
+- **Cheap instancing** — many copies share the texture; one material per visual variant.
+- **One draw call per group** instead of one per skinned hierarchy.
 
-Practical effect: you can render **many more animated meshes simultaneously** than a bone-driven setup would allow on Spectacles hardware.
-
-Trade-off: the animation is **baked and immutable** — you can't blend bones / drive IK / procedurally re-target at runtime. SimpleVAT is for content that can be authored ahead of time. Switching between **multiple baked clips** at runtime is supported via the `VATAnimationController` API (`play("Run")`, etc.).
+Trade-off: the animation is **baked and immutable** — no IK, no runtime bone blending, no procedural retargeting. Switching between multiple baked clips is supported via the controller API (`controller.play("Run")`).
 
 ## What you can build with this
 
-Creativity is the limit. A few directions that fit naturally:
+- **Crowds and swarms** — fish, birds, insects, worms. Give each instance a different `setTimeOffset()` so they don't tick in lockstep.
+- **Ambient world life** — flags, plants, breathing volumes, idle background creatures.
+- **Cloth / soft-body playback** — bake a cached Blender sim once, replay it deterministically with zero physics cost. Topology must stay constant, so liquid meshes / particles / smoke / fracture sims don't fit.
+- **Character cameos** — small NPCs with a handful of looped clips (idle / wave / dance) switched via `play("Wave")`.
+- **Procedural reveals** — unfold / morph / build-up authored in Blender, triggered on a beat or interaction.
+- **Vertex FX on a single mesh** — portals, energy waves, pulsing crystals, vines unfurling. Not for particle explosions or liquid splashes.
 
-- **Crowds and swarms** — schools of fish, flocks of birds, insects, worms. One mesh, one shader, many copies, each with a `setTimeOffset()` so they don't move in lockstep.
-- **Ambient world life** — flapping flags, swaying plants, idle creatures in the background of an AR scene, breathing volume of a sleeping monster.
-- **Cloth / soft-body playback** — bake a Blender cloth or soft-body simulation once (must cache it in Blender first), replay it deterministically on Spectacles with zero physics cost. Topology has to stay constant across the sim, so **Mantaflow liquid meshes, particles, smoke/fire and cell-fracture rigid bodies won't work** — those change vertex count per frame.
-- **Character cameos** — a small interactive NPC with a handful of looped clips (idle / wave / dance) switched on user gesture via `play("Wave")`.
-- **Procedural object reveals** — bake an unfold / morph / build-up animation in Blender, trigger it on a beat or interaction.
-- **Stylized vertex FX on a single mesh** — morphing portals, energy waves, pulsing crystals, twisting vines, hand-animated splash hits modeled as one mesh that deforms. Anything where a single artist-authored mesh swirls / pulses / unfurls on constant topology. Not for particle explosions / liquid splashes / smoke — those change vertex count and need different tech.
-
-Anywhere you'd reach for a bone rig **just to play back a pre-authored loop**, VAT will be cheaper and let you push the count up by an order of magnitude.
-
-> The 2K texture limits below are deliberately conservative — Spectacles is performance-tight and the current ceilings (≤ 2048 verts and ≤ 2048 frames per clip) fit the vast majority of real use cases. The pipeline can be extended (vertex-row wrapping, multi-texture chains) to lift those limits, but for now the **balance of simplicity vs flexibility is the point**.
+> 2K × 2K is the per-clip ceiling on Spectacles. Conservative on purpose — the pipeline can be extended later, but the current limits cover most real cases without complicating the format.
 
 ---
 
 ## How it works
 
-1. **In Blender** — pick the actions you want (or just use the scene timeline / NLA / simulation / shape keys). One click bakes each animation into a `{base}_{anim}_vat.png` position map plus a small JSON metadata sidecar. A shared `{base}.fbx` is exported with the rest pose.
-
-2. **In Lens Studio** — the SimpleVAT panel scans the export folder, lists every animation it finds, lets you tick which ones to import, then creates the material, imports the textures, spawns the mesh, and attaches the runtime controller.
-
-3. **At runtime** — the bundled `VATAnimationController` script lets any other component switch animations with one call: `controller.play("Run")`. No bones evaluated on device — the whole animation is GPU-sampled from the position texture, so it costs almost nothing per instance.
+1. **Blender** — pick actions (or use the scene timeline / NLA / sim / shape keys). One click bakes each animation into `{base}_{anim}_vat.png` + a JSON sidecar. A shared `{base}.fbx` carries the rest pose.
+2. **Lens Studio** — the SimpleVAT panel scans the folder, lists detected animations, imports the ones you tick, creates the material, spawns the mesh, attaches the controller.
+3. **Runtime** — `controller.play("Run")` switches clips. The vertex shader samples the texture; cost per instance is negligible.
 
 ---
 
@@ -60,12 +50,11 @@ Anywhere you'd reach for a bone rig **just to play back a pre-authored loop**, V
 
 ```
 LensStudio-SimpleVAT/
-├── BlenderAddon/            ← Blender 4.2+ add-on (Direct Bake, no GeoNodes)
+├── BlenderAddon/            ← Blender 4.2+ add-on
 ├── SimpleVAT/               ← Lens Studio 5 plugin
-│   ├── module.json
 │   ├── main.js
 │   └── Resources/
-│       ├── VAT.ss_graph                  (bundled shader)
+│       ├── VAT.ss_graph                  (shader)
 │       └── VATAnimationController.ts     (runtime API)
 ├── README.md
 └── LICENSE
@@ -76,76 +65,48 @@ LensStudio-SimpleVAT/
 ## Install
 
 ### Blender add-on
-
-1. Download **`BlenderAddon.zip`** from the repo root (or build fresh via `./build_addon.sh`).
+1. Download `BlenderAddon.zip` from the repo root.
 2. Blender → **Edit › Preferences › Get Extensions › Install from Disk…** → pick the zip.
-3. The panel appears in `View 3D › Sidebar (N) › VAT`.
-
-> _Contributors: after editing files under `BlenderAddon/`, run `./build_addon.sh` to refresh the zip before committing._
+3. Panel: `View 3D › Sidebar (N) › VAT`.
 
 ### Lens Studio plugin
-
-1. Copy the `SimpleVAT/` folder into your project's `Plugins/` directory (or LS user-plugins folder for global use).
+1. Copy `SimpleVAT/` into your project's `Plugins/` folder (or LS user-plugins folder for global use).
 2. Restart Lens Studio.
-3. Open `Window › Panels › SimpleVAT`.
+3. Panel: `Window › Panels › SimpleVAT`.
 
 ---
 
 ## Workflow
 
-### 1) Bake in Blender
+### Bake in Blender
+1. Select the mesh, open the **VAT** sidebar, set Output folder.
+2. **Refresh Actions** → tick what to bake. For 4.4+ slotted actions, pick the right slot in the row's dropdown.
+3. **Bake N Actions**.
 
-1. Select the mesh (with armature, shape keys, or simulation modifiers).
-2. Open the **VAT** sidebar.
-3. Set the **Output** folder.
-4. Click **Refresh Actions** → tick the animations you want.
-5. (Optional) if an action has multiple slots, pick the right one in the dropdown.
-6. Click **Bake N Actions**.
+Output per anim: `{base}_{action}_vat.png` + `{base}_{action}.json`. Shared: `{base}.fbx`.
 
-Output per animation: `{base}_{action}_vat.png` (position texture) + `{base}_{action}.json` (metadata sidecar).
-Plus a shared `{base}.fbx` (rest pose, with `VAT_UV` layer).
-
-### 2) Import in Lens Studio
-
-1. Open the **SimpleVAT** panel.
-2. **Browse** to the `{base}_vat/` export folder. The plugin auto-scans.
-3. Tick the animations to import.
-4. Configure import policies:
+### Import in Lens Studio
+1. **Browse** to the `{base}_vat/` export folder. The plugin scans automatically.
+2. Tick animations to import. Set policies:
    - **On texture conflict:** Overwrite / Skip existing
    - **On existing object:** Update controller / Replace object / Skip scene
-5. Click **Import Selected**.
+3. **Import Selected**.
 
-The plugin creates `Assets/VAT/{base}/` with:
-- `Materials/Shaders/VAT` (bundled shader graph)
-- `Materials/{base}_VAT_Material`
-- `Script/VATAnimationController`
-- `Textures (Remove Compression)/...` (one PNG per animation)
-- the imported FBX
+Creates `Assets/VAT/{base}/` with the material, shader, controller script, textures, and FBX. Spawns `{base}_VAT` SceneObject with everything wired.
 
-And spawns a `{base}_VAT` SceneObject with the material applied and the controller attached.
+### ⚠️ Mandatory post-import — disable texture compression
 
-### ⚠️ Mandatory post-import step — disable texture compression
+The textures land in a folder named `Textures (Remove Compression)` as a reminder. **You MUST disable compression on every VAT texture** or it renders broken (banding, scrambled deformation).
 
-The textures land in a folder literally named `Textures (Remove Compression)` for a reason. **You MUST disable compression on every VAT texture or the animation will render broken** (banding, jittering verts, scrambled deformation).
-
-For each PNG inside `Textures (Remove Compression)/`:
-
-1. Select the texture in the Asset panel
-2. Open the Inspector
-3. Set **Optimization Type → `None`**
-4. (Recommended) set **Filtering Mode → `Nearest`** and **Mip Maps → `Off`**
-
-This is unavoidable because the VAT format encodes precise per-pixel offset values — any compression / mip filtering averages neighboring pixels and corrupts the encoding.
+For each texture: Inspector → **Optimization Type → `None`**. Recommended also: **Filtering → `Nearest`**, **Mip Maps → Off**. The VAT format encodes precise per-pixel offsets — averaging neighbors corrupts the encoding.
 
 ---
 
 ## Runtime API — VATAnimationController
 
-The controller is attached to the spawned mesh and exposes a small, stable API for other scripts to drive playback.
-
 ```typescript
 class VATAnimationController extends BaseScriptComponent {
-    // Inputs populated at import time:
+    // Inputs populated by the importer:
     material: Material;
     animationNames: string[];
     positionMaps: Texture[];
@@ -166,7 +127,7 @@ class VATAnimationController extends BaseScriptComponent {
 }
 ```
 
-### Connect from your own script
+### Drive it from your own script
 
 ```typescript
 @component
@@ -176,64 +137,49 @@ export class WormBehavior extends BaseScriptComponent {
     onAwake() {
         this.createEvent("TapEvent").bind(() => this.vat.play("Attack"));
     }
-
-    onHurt() {
-        this.vat.play("Hurt");
-    }
 }
 ```
 
-In the Inspector, drag the spawned `{base}_VAT` object into the `vat` field — LS resolves the component automatically.
-
----
-
-## Coordinate system
-
-Blender is Z-up, Lens Studio is Y-up. The shader applies the swap as it samples the texture (`offset.xzy` with Y-negation), so the export and import are direct — no manual conversion needed.
+Drag the spawned `{base}_VAT` object into the `vat` input — LS resolves the component automatically.
 
 ---
 
 ## Limits
 
-### Texture size — 2K × 2K hard cap
-
-Spectacles caps texture dimensions at **2048 × 2048**. The VAT format uses:
+**Texture size: 2048 × 2048 max** (Spectacles cap).
 
 | Axis | Encodes | Max |
 |---|---|---|
-| Width | One column per vertex | **2048 vertices** |
-| Height | One row per frame | **2048 frames** |
+| Width | one column per vertex | 2048 verts |
+| Height | one row per frame | 2048 frames |
 
-If you exceed either, the Blender add-on **refuses to bake** with an explicit error. Why we don't just allow it: Lens Studio would silently downscale the texture on import, and downscaling a VAT corrupts the per-pixel encoding → garbage animation at runtime.
+The Blender add-on **refuses to bake** if either limit is exceeded. To stay under:
+- **Too many vertices** → decimate (`Modifier › Decimate`) or split the mesh and bake parts separately.
+- **Too many frames** → trim the action, lower fps (24 ≫ 60), or split into multiple clips. At 60 fps that's ~34 s per clip; at 24 fps ~85 s.
 
-How to stay under the limit:
-- **Too many vertices** → decimate the mesh in Blender (`Modifier › Decimate`) or split the mesh into multiple objects and bake each separately.
-- **Too many frames** → trim the action, reduce framerate (bake at 24 fps instead of 60), or split a long animation into multiple shorter clips.
+**Other:**
+- Topology must stay constant across baked frames.
+- One material per imported mesh — duplicate the material asset if you instantiate the prefab in multiple places.
+- No normal-map output; the shader uses face-derived normals from the rest mesh.
+- LS asset-delete API is unreliable. On `Overwrite` re-import, old texture assets sometimes linger as `Texture 2`. Delete manually, or use `Skip existing`.
 
-For a 60 fps animation, the per-clip ceiling is about **34 seconds** (60 × 34 ≈ 2040 frames). For 24 fps it's ~85 seconds.
+---
 
-### Other limitations
+## Coordinate system
 
-- **Topology must stay constant** across all baked frames. The bake aborts if vertex count changes mid-animation.
-- **One material per imported mesh.** The controller writes into that material at runtime to switch animations. If you instantiate the same mesh prefab manually elsewhere in the scene, duplicate the material asset so each copy has its own playhead.
-- **No normal-map output.** The shader uses face-derived normals from the rest mesh — fine for organic deformation, less ideal for cloth / cape flaps.
-- **Lens Studio asset deletion API is finicky.** On re-import with **Overwrite**, sometimes old texture assets remain alongside the new ones with a numeric suffix (`Texture 2`). Delete manually if it bothers you, or use **Skip existing** policy.
+Blender is Z-up, Lens Studio is Y-up. The shader bakes the swap in when sampling — no manual conversion in either half.
 
 ---
 
 ## Tested with
 
-- Blender 4.2 → 5.1
-- Lens Studio 5.10+
-- Snap Spectacles (2024)
+Blender 4.2 → 5.1 · Lens Studio 5.10+ · Snap Spectacles (2024)
 
 ---
 
 ## Contributing
 
-PRs welcome. The codebase is intentionally small (a few hundred lines per side) so it's easy to read and modify. Please keep new dependencies minimal — both plugins should be drop-in installable.
-
----
+PRs welcome. Each side is a few hundred lines — easy to read and modify. Keep new dependencies minimal; both plugins should stay drop-in installable.
 
 ## License
 
@@ -241,6 +187,4 @@ PRs welcome. The codebase is intentionally small (a few hundred lines per side) 
 
 ## Authors
 
-**Pavlo Tkachenko & Stijn Spanhove** — Spectacles developers.
-
-Portfolio: [pavlo-stijn.dev](https://pavlo-stijn.dev) · 2026
+**Pavlo Tkachenko & Stijn Spanhove** · [pavlo-stijn.dev](https://pavlo-stijn.dev) · 2026
