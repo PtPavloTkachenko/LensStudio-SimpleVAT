@@ -46,9 +46,11 @@ LensStudio-SimpleVAT/
 
 ### Blender add-on
 
-1. Zip the `BlenderAddon/` folder.
+1. Download **`BlenderAddon.zip`** from the repo root (or build fresh via `./build_addon.sh`).
 2. Blender → **Edit › Preferences › Get Extensions › Install from Disk…** → pick the zip.
 3. The panel appears in `View 3D › Sidebar (N) › VAT`.
+
+> _Contributors: after editing files under `BlenderAddon/`, run `./build_addon.sh` to refresh the zip before committing._
 
 ### Lens Studio plugin
 

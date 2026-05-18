@@ -14,8 +14,9 @@ venv/
 *.blend2
 *.blend@
 
-# Built artifacts (Blender add-on zip is built fresh on release)
-BlenderAddon.zip
+# Built artifacts — BlenderAddon.zip is intentionally tracked so users can
+# install the add-on without rebuilding from source. Rebuild it via
+# ./build_addon.sh after editing files under BlenderAddon/.
 
 # Lens Studio project caches (only relevant inside example projects)
 Cache/
