@@ -1,0 +1,38 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+
+# Blender
+*.blend1
+*.blend2
+*.blend@
+
+# Built artifacts (Blender add-on zip is built fresh on release)
+BlenderAddon.zip
+
+# Lens Studio project caches (only relevant inside example projects)
+Cache/
+Workspaces/
+PluginsUserPreferences/
+*.esproj.lock
+*.esproj.*.lock
+
+# Lens Studio asset .meta files for the SHADER PROJECT
+# (do not exclude .meta inside SimpleVAT/Resources/ — those are bundled)
+
+# IDE
+.vscode/
+.idea/
+*.code-workspace
+.claude/
+
+# Logs
+*.log
+log.txt
