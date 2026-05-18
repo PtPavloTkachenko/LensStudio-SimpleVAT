@@ -33,12 +33,12 @@ Trade-off: the animation is **baked and immutable** — you can't blend bones / 
 
 Creativity is the limit. A few directions that fit naturally:
 
-- **Crowds and swarms** — schools of fish, flocks of birds, insects, worms, particles with personality. One mesh, one shader, many copies, each with a `setTimeOffset()` so they don't move in lockstep.
+- **Crowds and swarms** — schools of fish, flocks of birds, insects, worms. One mesh, one shader, many copies, each with a `setTimeOffset()` so they don't move in lockstep.
 - **Ambient world life** — flapping flags, swaying plants, idle creatures in the background of an AR scene, breathing volume of a sleeping monster.
-- **Simulation playback** — bake a Blender cloth / soft body / fluid simulation once, replay it deterministically on Spectacles with zero physics cost.
+- **Cloth / soft-body playback** — bake a Blender cloth or soft-body simulation once (must cache it in Blender first), replay it deterministically on Spectacles with zero physics cost. Topology has to stay constant across the sim, so **Mantaflow liquid meshes, particles, smoke/fire and cell-fracture rigid bodies won't work** — those change vertex count per frame.
 - **Character cameos** — a small interactive NPC with a handful of looped clips (idle / wave / dance) switched on user gesture via `play("Wave")`.
 - **Procedural object reveals** — bake an unfold / morph / build-up animation in Blender, trigger it on a beat or interaction.
-- **Stylized VFX** — explosions, splashes, magic effects that need precise vertex-level animation but no per-instance variation.
+- **Stylized vertex VFX** — explosions, splashes, magic effects that need precise vertex-level animation on a **single constant-topology mesh**.
 
 Anywhere you'd reach for a bone rig **just to play back a pre-authored loop**, VAT will be cheaper and let you push the count up by an order of magnitude.
 
