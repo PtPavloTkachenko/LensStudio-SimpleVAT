@@ -9,6 +9,11 @@ from mathutils import Vector
 
 TAG = "[VAT]"
 
+# Spectacles texture limit. Anything above this gets silently downscaled
+# by Lens Studio, which corrupts the per-pixel VAT encoding and produces
+# garbage animation. We refuse to bake instead.
+MAX_TEX_DIM = 2048
+
 
 # ---------- helpers ----------
 
@@ -410,6 +415,14 @@ class OBJECT_OT_VATBake(bpy.types.Operator):
         )
         print(f"{TAG} Rest pose captured: {num_verts} verts")
 
+        # Hard stop if mesh exceeds the Spectacles texture limit.
+        if num_verts > MAX_TEX_DIM:
+            msg = (f"Mesh has {num_verts} vertices, max for VAT is {MAX_TEX_DIM}. "
+                   f"Decimate the mesh or split it before baking.")
+            self.report({'ERROR'}, msg)
+            print(f"{TAG} ABORT: {msg}")
+            return {'CANCELLED'}
+
         object_dir = os.path.join(output_dir, f"{base}_vat")
         os.makedirs(object_dir, exist_ok=True)
 
@@ -429,6 +442,12 @@ class OBJECT_OT_VATBake(bpy.types.Operator):
                 fr_end = scene.frame_end
                 num_frames = fr_end - fr_start + 1
                 action_name = base  # fallback name = object name
+
+                if num_frames > MAX_TEX_DIM:
+                    self.report({'ERROR'},
+                                f"Timeline is {num_frames} frames, max for VAT is {MAX_TEX_DIM}. "
+                                f"Shorten the scene range or split the bake.")
+                    return {'CANCELLED'}
 
                 offsets = _collect_offsets(obj, context, scene, fr_start, fr_end, rest_positions)
                 sym = _compute_sym_bbox(offsets)
@@ -498,6 +517,12 @@ class OBJECT_OT_VATBake(bpy.types.Operator):
                         # include keyframes that don't belong to this animation.
                         fr_start, fr_end = _slot_frame_range(action, bone_slot)
                         num_frames = fr_end - fr_start + 1
+
+                        # Spectacles texture-size guard on the per-action axis too.
+                        if num_frames > MAX_TEX_DIM:
+                            print(f"{TAG}   ABORT '{action_name}': {num_frames} frames > "
+                                  f"{MAX_TEX_DIM} max. Trim the action or split it.")
+                            continue
 
                         # Frame "bounce" — depsgraph sometimes refuses to re-evaluate
                         # an action change unless the scene frame ACTUALLY changes.

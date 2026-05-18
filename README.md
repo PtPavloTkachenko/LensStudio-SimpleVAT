@@ -11,6 +11,22 @@ A two-part open-source pipeline for Snap Spectacles:
 
 ---
 
+## Why this exists
+
+Spectacles is performance-tight. A scene with **dozens of animated characters**, each carrying an armature with full bone evaluation, hits the draw-call / CPU budget fast — runtime bone transforms are expensive, every skinned mesh adds work, and the scene graph balloons.
+
+SimpleVAT removes that cost entirely. The animation is **baked into a texture once**; at runtime the GPU samples that texture per vertex. Result:
+- **No bones in the scene** — just one mesh + one shader + one tiny controller component.
+- **No CPU-side animation eval** — pure vertex shader.
+- **Cheap instancing** — many copies of the same mesh share the same texture; one extra material per visual variant.
+- **One draw call per visible group** instead of one per skinned hierarchy.
+
+Practical effect: you can render **many more animated meshes simultaneously** than a bone-driven setup would allow on Spectacles hardware.
+
+Trade-off: the animation is **baked and immutable** — you can't blend bones / drive IK / procedurally re-target at runtime. SimpleVAT is for content that can be authored ahead of time. Switching between **multiple baked clips** at runtime is supported via the `VATAnimationController` API (`play("Run")`, etc.).
+
+---
+
 ## How it works
 
 ```mermaid
@@ -175,11 +191,30 @@ Blender is Z-up, Lens Studio is Y-up. The shader applies the swap as it samples 
 
 ---
 
-## Known limitations
+## Limits
+
+### Texture size — 2K × 2K hard cap
+
+Spectacles caps texture dimensions at **2048 × 2048**. The VAT format uses:
+
+| Axis | Encodes | Max |
+|---|---|---|
+| Width | One column per vertex | **2048 vertices** |
+| Height | One row per frame | **2048 frames** |
+
+If you exceed either, the Blender add-on **refuses to bake** with an explicit error. Why we don't just allow it: Lens Studio would silently downscale the texture on import, and downscaling a VAT corrupts the per-pixel encoding → garbage animation at runtime.
+
+How to stay under the limit:
+- **Too many vertices** → decimate the mesh in Blender (`Modifier › Decimate`) or split the mesh into multiple objects and bake each separately.
+- **Too many frames** → trim the action, reduce framerate (bake at 24 fps instead of 60), or split a long animation into multiple shorter clips.
+
+For a 60 fps animation, the per-clip ceiling is about **34 seconds** (60 × 34 ≈ 2040 frames). For 24 fps it's ~85 seconds.
+
+### Other limitations
 
 - **Topology must stay constant** across all baked frames. The bake aborts if vertex count changes mid-animation.
 - **One material per imported mesh.** The controller writes into that material at runtime to switch animations. If you instantiate the same mesh prefab manually elsewhere in the scene, duplicate the material asset so each copy has its own playhead.
-- **No normal-map output.** The new shader uses face-derived normals from the rest mesh.
+- **No normal-map output.** The shader uses face-derived normals from the rest mesh — fine for organic deformation, less ideal for cloth / cape flaps.
 - **Lens Studio asset deletion API is finicky.** On re-import with **Overwrite**, sometimes old texture assets remain alongside the new ones with a numeric suffix (`Texture 2`). Delete manually if it bothers you, or use **Skip existing** policy.
 
 ---
