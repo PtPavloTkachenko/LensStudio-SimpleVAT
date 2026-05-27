@@ -2,6 +2,8 @@
 
 **Bake vertex-animation textures in Blender, drop them into Lens Studio with one click.**
 
+📺 **Walkthrough video:** [youtu.be/V6wNZuK7GWk](https://youtu.be/V6wNZuK7GWk)
+
 ![SimpleVAT demo — many animated meshes at once](docs/demo.gif)
 
 _From [**Fruit Defence**](https://www.linkedin.com/posts/stijn-spanhove_this-is-our-submission-for-the-spectacles-activity-7401212775974465536-FYWD). Dozens of animated meshes at once — a bone rig per character wouldn't fit the perf budget._
