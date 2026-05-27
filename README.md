@@ -2,7 +2,9 @@
 
 **Bake vertex-animation textures in Blender, drop them into Lens Studio with one click.**
 
-📺 **Walkthrough video:** [youtu.be/V6wNZuK7GWk](https://youtu.be/V6wNZuK7GWk)
+[![Watch the walkthrough on YouTube](docs/youtube-cover.png)](https://youtu.be/V6wNZuK7GWk)
+
+📺 [**Watch the walkthrough on YouTube →**](https://youtu.be/V6wNZuK7GWk)
 
 ![SimpleVAT demo — many animated meshes at once](docs/demo.gif)
 
