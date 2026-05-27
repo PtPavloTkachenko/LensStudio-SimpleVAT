@@ -83,23 +83,33 @@ LensStudio-SimpleVAT/
 
 1. Open **Lens Studio → Preferences**.
 
-   <img src="docs/install-1-preferences.png" alt="Lens Studio menu → Preferences" width="50%">
+<p align="center">
+  <img src="docs/install-1-preferences.png" alt="Lens Studio menu → Preferences" width="50%">
+</p>
 
 2. In Preferences go to the **Plugins** tab. Under **Additional Libraries**, click the **+ Add New Location** button and pick the folder where you cloned this repo (the one containing `SimpleVAT/`).
 
-   <img src="docs/install-2-plugins.png" alt="Preferences → Plugins → Add New Location" width="50%">
+<p align="center">
+  <img src="docs/install-2-plugins.png" alt="Preferences → Plugins → Add New Location" width="50%">
+</p>
 
 3. Lens Studio asks for permission to load the module. Click **Trust and Load**.
 
-   <img src="docs/install-3-trust-and-load.png" alt="Trust and Load dialog" width="50%">
+<p align="center">
+  <img src="docs/install-3-trust-and-load.png" alt="Trust and Load dialog" width="50%">
+</p>
 
 4. **SimpleVAT** now shows up in the **Installed Plugins** list — make sure its checkbox is ticked.
 
-   <img src="docs/install-4-installed.png" alt="SimpleVAT in the installed plugins list" width="50%">
+<p align="center">
+  <img src="docs/install-4-installed.png" alt="SimpleVAT in the installed plugins list" width="50%">
+</p>
 
 5. Open the panel via **Window → SimpleVAT**.
 
-   <img src="docs/install-5-open-panel.png" alt="Window menu → SimpleVAT" width="50%">
+<p align="center">
+  <img src="docs/install-5-open-panel.png" alt="Window menu → SimpleVAT" width="50%">
+</p>
 
 ---
 
