@@ -2,13 +2,19 @@
 
 **Bake vertex-animation textures in Blender, drop them into Lens Studio with one click.**
 
-[![Watch the walkthrough on YouTube](docs/youtube-cover.png)](https://youtu.be/V6wNZuK7GWk)
+<p align="center">
+  <a href="https://youtu.be/V6wNZuK7GWk">
+    <img src="docs/youtube-cover.png" alt="Watch the walkthrough on YouTube" width="50%">
+  </a>
+</p>
 
-📺 [**Watch the walkthrough on YouTube →**](https://youtu.be/V6wNZuK7GWk)
+<p align="center">📺 <a href="https://youtu.be/V6wNZuK7GWk"><b>Watch the walkthrough on YouTube →</b></a></p>
 
-![SimpleVAT demo — many animated meshes at once](docs/demo.gif)
+<p align="center">
+  <img src="docs/demo.gif" alt="SimpleVAT demo — many animated meshes at once">
+</p>
 
-_From [**Fruit Defence**](https://www.linkedin.com/posts/stijn-spanhove_this-is-our-submission-for-the-spectacles-activity-7401212775974465536-FYWD). Dozens of animated meshes at once — a bone rig per character wouldn't fit the perf budget._
+<p align="center"><em>From <a href="https://www.linkedin.com/posts/stijn-spanhove_this-is-our-submission-for-the-spectacles-activity-7401212775974465536-FYWD"><b>Fruit Defence</b></a>. Dozens of animated meshes at once — a bone rig per character wouldn't fit the perf budget.</em></p>
 
 Two-part open-source pipeline for Snap Spectacles:
 - **Blender add-on** that bakes skeletal / shape-key / cloth / soft-body animation into a VAT export folder.
@@ -101,7 +107,9 @@ LensStudio-SimpleVAT/
 
 ### Bake in Blender
 
-<img src="docs/ui-blender.png" alt="Blender VAT sidebar panel" width="50%">
+<p align="center">
+  <img src="docs/ui-blender.png" alt="Blender VAT sidebar panel" width="50%">
+</p>
 
 1. Select the mesh, open the **VAT** sidebar, set Output folder.
 2. **Refresh Actions** → tick what to bake. For 4.4+ slotted actions, pick the right slot in the row's dropdown.
@@ -111,7 +119,9 @@ Output per anim: `{base}_{action}_vat.png` + `{base}_{action}.json`. Shared: `{b
 
 ### Import in Lens Studio
 
-<img src="docs/ui-lens-studio.png" alt="SimpleVAT panel in Lens Studio" width="50%">
+<p align="center">
+  <img src="docs/ui-lens-studio.png" alt="SimpleVAT panel in Lens Studio" width="50%">
+</p>
 
 1. **Browse** to the `{base}_vat/` export folder. The plugin scans automatically.
 2. Tick animations to import. Set policies:
