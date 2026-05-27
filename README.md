@@ -70,15 +70,35 @@ LensStudio-SimpleVAT/
 3. Panel: `View 3D › Sidebar (N) › VAT`.
 
 ### Lens Studio plugin
-1. Copy `SimpleVAT/` into your project's `Plugins/` folder (or LS user-plugins folder for global use).
-2. Restart Lens Studio.
-3. Panel: `Window › Panels › SimpleVAT`.
+
+1. Open **Lens Studio → Preferences**.
+
+   ![Lens Studio menu → Preferences](docs/install-1-preferences.png)
+
+2. In Preferences go to the **Plugins** tab. Under **Additional Libraries**, click the **+ Add New Location** button and pick the folder where you cloned this repo (the one containing `SimpleVAT/`).
+
+   ![Preferences → Plugins → Add New Location](docs/install-2-plugins.png)
+
+3. Lens Studio asks for permission to load the module. Click **Trust and Load**.
+
+   ![Trust and Load dialog](docs/install-3-trust-and-load.png)
+
+4. **SimpleVAT** now shows up in the **Installed Plugins** list — make sure its checkbox is ticked.
+
+   ![SimpleVAT in the installed plugins list](docs/install-4-installed.png)
+
+5. Open the panel via **Window → SimpleVAT**.
+
+   ![Window menu → SimpleVAT](docs/install-5-open-panel.png)
 
 ---
 
 ## Workflow
 
 ### Bake in Blender
+
+![Blender VAT sidebar panel](docs/ui-blender.png)
+
 1. Select the mesh, open the **VAT** sidebar, set Output folder.
 2. **Refresh Actions** → tick what to bake. For 4.4+ slotted actions, pick the right slot in the row's dropdown.
 3. **Bake N Actions**.
@@ -86,6 +106,9 @@ LensStudio-SimpleVAT/
 Output per anim: `{base}_{action}_vat.png` + `{base}_{action}.json`. Shared: `{base}.fbx`.
 
 ### Import in Lens Studio
+
+![SimpleVAT panel in Lens Studio](docs/ui-lens-studio.png)
+
 1. **Browse** to the `{base}_vat/` export folder. The plugin scans automatically.
 2. Tick animations to import. Set policies:
    - **On texture conflict:** Overwrite / Skip existing
